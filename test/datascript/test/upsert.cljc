@@ -161,3 +161,13 @@
                       [:db/add -1 :age 35]
                       [:db/add -1 :name "Oleg"]
                       [:db/add -1 :age 36]])))))
+
+(deftest test-ref-upsert
+  (let [db (d/empty-db {:name {:db/unique :db.unique/identity}
+                        :ref {:db/valueType :db.type/ref}})]
+    (are [tx res] (= res (tdc/all-datoms (d/db-with db tx)))
+      ;; Map iteration order may affect results.
+      ;; See https://github.com/tonsky/datascript/issues/76#issuecomment-269110873
+      [(array-map :ref {:name "Ivan"} :name "Ivan")]
+      #{[1 :name "Ivan"]
+        [1 :ref 1]})))
